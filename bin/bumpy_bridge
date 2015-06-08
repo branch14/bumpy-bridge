@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../../lib/bumpy_bridge', __FILE__)
+
+base = Dir.pwd
+config = File.expand_path('bumpy_bridge.yml', base)
+piddir = File.join(base, 'tmp', 'pids')
+
+Daemons.run_proc(File.basename(__FILE__), dir: piddir) do
+  Dir.chdir(base)
+  puts 'Establishing BumpyBridge...'
+  BumpyBridge.new(config).run
+end
+
+warn "BumpyBridge daemon exiting."

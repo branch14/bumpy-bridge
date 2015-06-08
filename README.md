@@ -6,7 +6,7 @@
                           |_|    |___/                    |___/
 # Welcome to BumpyBridge
 
-BumpyBridge is a bridge between RabbitMQ and Faye.
+Bridging RabbitMQ & Faye.
 
 ## Installation
 
@@ -42,6 +42,8 @@ Then run in the directory of the config file
     bumpy_bridge run
 
 Run with `DEBUG=1` for more output.
+
+    DEBUG=1 bumby_bridge run
 
 ## Contributing
 

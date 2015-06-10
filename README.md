@@ -43,7 +43,7 @@ Then run in the directory of the config file
 
 Run with `DEBUG=1` for more output.
 
-    DEBUG=1 bumby_bridge run
+    DEBUG=1 bumpy_bridge run
 
 ## Contributing
 

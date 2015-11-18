@@ -53,19 +53,45 @@ class BumpyBridge
 
   def faye2bunny(source, target, mapping)
     puts "faye2rabbitmq [#{source} -> #{target}]" if DEBUG
-    exchange = bunny_channel.fanout(target)
+    type, name = target.split('/')
+
+    options = {}
+    exchange = nil
+
+    case type
+    when 'exchange'
+      exchange = bunny_channel.fanout(name)
+    when 'queue'
+      queue = bunny_channel.queue(name)
+      exchange = bunny_channel.default_exchange
+      options[:routing_key] = queue.name
+    else raise "Unkown target type: #{type}"
+    end
+
     faye.subscribe(source) do |data|
       puts "[#{source} -> #{target}] #{data.inspect}" if DEBUG
-      exchange.publish(JSON.unparse(data))
+      exchange.publish(JSON.unparse(data), options)
     end
   end
 
   def bunny2faye(source, target, mapping)
     puts "rabbitmq2faye [#{source} -> #{target}]" if DEBUG
     mapping.options ||= {}
-    exchange = bunny_channel.fanout(source)
-    queue = bunny_channel.queue("", exclusive: true)
-    queue.bind exchange
+    type, name = source.split('/')
+    queue = nil
+
+    case type
+    when 'exchange'
+      # create an own queue and bind it to the given exchange
+      exchange = bunny_channel.fanout(name)
+      queue = bunny_channel.queue('', exclusive: true)
+      queue.bind exchange
+    when 'queue'
+      # pull events directly from the given queue
+      queue = bunny_channel.queue(name)
+    else raise "Unknown source type: #{type}"
+    end
+
     queue.subscribe(mapping.options) do |info, prop, body|
       data = JSON.parse(body)
       puts "[#{source} -> #{target}] #{data.inspect}" if DEBUG
